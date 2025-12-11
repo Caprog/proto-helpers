@@ -12,38 +12,70 @@ const styles = `
     #gui-panel::-webkit-scrollbar-track { background: rgba(0, 20, 10, 0.5); border-radius: 3px; }
     #gui-panel::-webkit-scrollbar-thumb { background: rgba(0, 255, 100, 0.2); border-radius: 3px; }
     
-    /* UPDATED: Increased vertical spacing for sections */
+    /* --- CORRECCIONES DE VISIBILIDAD Y ESPACIADO --- */
+    
     .gui-folder { 
-        margin-bottom: 30px; 
+        /* Más espacio entre secciones */
+        margin-bottom: 25px; 
         border-bottom: 1px solid rgba(0, 255, 100, 0.2); 
-        padding-bottom: 20px; 
+        padding-bottom: 15px; 
     }
     .gui-folder:last-child { border-bottom: none; margin-bottom: 0; }
     
     .gui-folder h3 {
-        margin: 0 0 15px 0; font-size: 14px; font-weight: 600; text-transform: uppercase;
+        /* FIX: display block para forzar salto de línea */
+        display: block; 
+        width: 100%;
+        margin: 0 0 15px 0; 
+        font-size: 14px; font-weight: 600; text-transform: uppercase;
         letter-spacing: 2px; color: #00ff66; text-shadow: 0 0 5px rgba(0, 255, 100, 0.5);
-        padding-bottom: 5px; display: inline-block; border-bottom: 2px solid rgba(0,255,100,0.5);
+        padding-bottom: 5px; 
+        border-bottom: 2px solid rgba(0,255,100,0.5);
     }
-    .gui-label { display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; }
-    .gui-slider { width: 100%; margin-bottom: 10px; background: transparent; -webkit-appearance: none; }
+    
+    .gui-label { 
+        display: block; 
+        margin-bottom: 8px; /* Más espacio debajo de etiquetas */
+        margin-top: 10px;   /* Espacio arriba para separar del control anterior */
+        font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; 
+    }
+    
+    .gui-checkbox-row { 
+        /* FIX: Flexbox para alinear checkbox y texto perfectamente */
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px; 
+        cursor: pointer; 
+        color: #eee; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; 
+        width: 100%;
+    }
+    .gui-checkbox {
+        margin-right: 10px;
+        /* Resetear márgenes nativos */
+        margin-top: 0; margin-bottom: 0;
+    }
+
+    .gui-slider { width: 100%; margin-bottom: 5px; background: transparent; -webkit-appearance: none; }
     .gui-slider::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #1a3322; }
     .gui-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 6px; background: #00ff66; margin-top: -5px; cursor: pointer; box-shadow: 0 0 8px #00ff66; }
+    
     .gui-color { width: 100%; height: 30px; border: 1px solid #224433; background: #000; cursor: pointer; margin-bottom: 10px; padding: 2px; }
-    .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; margin-bottom: 10px; font-family: monospace; outline: none; }
+    .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; margin-bottom: 10px; font-family: monospace; outline: none; box-sizing: border-box; }
     .gui-text-input:focus { border-color: #00ff66; }
+    
     .gui-display { 
         width: 100%; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff66; 
         border-left: 2px solid #00ff66; margin-bottom: 10px; font-family: monospace; font-size: 11px;
+        box-sizing: border-box;
     }
     .gui-separator { border-top: 1px dashed rgba(0,255,100,0.2); margin: 15px 0; width: 100%; }
-    .gui-checkbox-row { margin-bottom: 10px; cursor: pointer; color: #eee; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-    .gui-select { width: 100%; padding: 5px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: inherit; font-size: 11px; margin-bottom: 10px; cursor: pointer; outline: none; text-transform: uppercase; }
+    .gui-select { width: 100%; padding: 5px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: inherit; font-size: 11px; margin-bottom: 10px; cursor: pointer; outline: none; text-transform: uppercase; box-sizing: border-box; }
     .gui-value { float: right; color: #00ff66; font-family: monospace; font-size: 11px; }
+    
     .gui-button {
         width: 100%; padding: 12px; background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66;
         font-weight: bold; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-        cursor: pointer; transition: all 0.3s; margin-top: 10px;
+        cursor: pointer; transition: all 0.3s; margin-top: 5px;
     }
     .gui-button:hover { background: #00ff66; color: #000; box-shadow: 0 0 15px rgba(0, 255, 100, 0.6); }
     .gui-row { display: flex; gap: 5px; margin-bottom: 10px; }
@@ -53,7 +85,7 @@ const styles = `
         background: #051008; padding: 20px; border: 1px solid #00ff66; z-index: 200;
         width: 400px; box-shadow: 0 0 50px rgba(0,0,0,0.9);
     }
-    .gui-textarea { width: 100%; height: 150px; background: #020603; color: #00ff66; border: 1px solid #333; font-family: monospace; padding: 10px; font-size: 12px; resize: none; outline: none; }
+    .gui-textarea { width: 100%; height: 150px; background: #020603; color: #00ff66; border: 1px solid #333; font-family: monospace; padding: 10px; font-size: 12px; resize: none; outline: none; box-sizing: border-box; }
     .gui-modal-close { margin-top: 10px; padding: 5px 15px; background: transparent; color: #888; border: 1px solid #333; cursor: pointer; text-transform: uppercase; font-size: 10px; float: right; }
     .gui-modal-close:hover { color: #fff; border-color: #fff; }
 `;
@@ -232,9 +264,7 @@ export class GuiLib {
         return this;
     }
 
-    // --- REFACTORED ADD METHOD: Accepts a params object ---
     add(object, property, params = {}) {
-        // Determine type and delegate
         if (params.options) return this.addSelect(object, property, params);
         if (typeof object[property] === 'boolean') return this.addBoolean(object, property, params);
         if (typeof object[property] === 'number') return this.addSlider(object, property, params);
