@@ -7,79 +7,100 @@ const styles = `
         box-shadow: 0 0 20px rgba(0, 255, 100, 0.15); z-index: 100;
         user-select: none; -webkit-user-select: none;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-sizing: border-box;
+        
+        /* FIX: Aplicar Flex y Gap al contenedor principal para separar botones sueltos */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
     #gui-panel::-webkit-scrollbar { width: 6px; }
     #gui-panel::-webkit-scrollbar-track { background: rgba(0, 20, 10, 0.5); border-radius: 3px; }
     #gui-panel::-webkit-scrollbar-thumb { background: rgba(0, 255, 100, 0.2); border-radius: 3px; }
     
-    /* --- CORRECCIONES DE VISIBILIDAD Y ESPACIADO --- */
+    /* --- FLEX LAYOUT & GAP UPDATES --- */
     
     .gui-folder { 
-        /* Más espacio entre secciones */
-        margin-bottom: 25px; 
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        /* Separación visual entre carpetas */
+        margin-bottom: 15px; 
         border-bottom: 1px solid rgba(0, 255, 100, 0.2); 
-        padding-bottom: 15px; 
+        padding-bottom: 20px; 
     }
-    .gui-folder:last-child { border-bottom: none; margin-bottom: 0; }
+    .gui-folder:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     
     .gui-folder h3 {
-        /* FIX: display block para forzar salto de línea */
         display: block; 
         width: 100%;
-        margin: 0 0 15px 0; 
+        margin: 0; 
         font-size: 14px; font-weight: 600; text-transform: uppercase;
         letter-spacing: 2px; color: #00ff66; text-shadow: 0 0 5px rgba(0, 255, 100, 0.5);
         padding-bottom: 5px; 
         border-bottom: 2px solid rgba(0,255,100,0.5);
     }
     
+    .gui-control {
+        display: flex;
+        flex-direction: column;
+        gap: 6px; 
+        width: 100%;
+    }
+
     .gui-label { 
         display: block; 
-        margin-bottom: 8px; /* Más espacio debajo de etiquetas */
-        margin-top: 10px;   /* Espacio arriba para separar del control anterior */
         font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; 
+        margin: 0;
     }
     
     .gui-checkbox-row { 
-        /* FIX: Flexbox para alinear checkbox y texto perfectamente */
         display: flex;
         align-items: center;
-        margin-bottom: 12px; 
         cursor: pointer; 
         color: #eee; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; 
         width: 100%;
+        margin: 0;
     }
     .gui-checkbox {
         margin-right: 10px;
-        /* Resetear márgenes nativos */
         margin-top: 0; margin-bottom: 0;
+        transform: scale(1.2);
     }
 
-    .gui-slider { width: 100%; margin-bottom: 5px; background: transparent; -webkit-appearance: none; }
+    .gui-slider { width: 100%; background: transparent; -webkit-appearance: none; margin: 0; display: block; }
     .gui-slider::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #1a3322; }
     .gui-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 6px; background: #00ff66; margin-top: -5px; cursor: pointer; box-shadow: 0 0 8px #00ff66; }
     
-    .gui-color { width: 100%; height: 30px; border: 1px solid #224433; background: #000; cursor: pointer; margin-bottom: 10px; padding: 2px; }
-    .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; margin-bottom: 10px; font-family: monospace; outline: none; box-sizing: border-box; }
+    .gui-color { width: 100%; height: 30px; border: 1px solid #224433; background: #000; cursor: pointer; padding: 2px; margin: 0; display: block; }
+    
+    .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: monospace; outline: none; box-sizing: border-box; margin: 0; display: block; }
     .gui-text-input:focus { border-color: #00ff66; }
     
     .gui-display { 
         width: 100%; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff66; 
-        border-left: 2px solid #00ff66; margin-bottom: 10px; font-family: monospace; font-size: 11px;
-        box-sizing: border-box;
+        border-left: 2px solid #00ff66; font-family: monospace; font-size: 11px;
+        box-sizing: border-box; margin: 0;
     }
-    .gui-separator { border-top: 1px dashed rgba(0,255,100,0.2); margin: 15px 0; width: 100%; }
-    .gui-select { width: 100%; padding: 5px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: inherit; font-size: 11px; margin-bottom: 10px; cursor: pointer; outline: none; text-transform: uppercase; box-sizing: border-box; }
+    
+    .gui-select { width: 100%; padding: 5px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: inherit; font-size: 11px; cursor: pointer; outline: none; text-transform: uppercase; box-sizing: border-box; margin: 0; }
+    
+    .gui-separator { border-top: 1px dashed rgba(0,255,100,0.2); margin: 5px 0; width: 100%; }
     .gui-value { float: right; color: #00ff66; font-family: monospace; font-size: 11px; }
     
+    /* FIX: Margen extra en botones para asegurar separación visual si el gap falla */
     .gui-button {
         width: 100%; padding: 12px; background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66;
         font-weight: bold; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-        cursor: pointer; transition: all 0.3s; margin-top: 5px;
+        cursor: pointer; transition: all 0.3s; margin-bottom: 5px;
     }
+    .gui-button:last-child { margin-bottom: 0; }
     .gui-button:hover { background: #00ff66; color: #000; box-shadow: 0 0 15px rgba(0, 255, 100, 0.6); }
-    .gui-row { display: flex; gap: 5px; margin-bottom: 10px; }
-    .gui-row .gui-button { margin-top: 0; flex: 1; }
+    
+    .gui-row { display: flex; gap: 8px; margin: 0; width: 100%; }
+    .gui-row .gui-button { flex: 1; margin-bottom: 0; }
+    
     .gui-modal {
         display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background: #051008; padding: 20px; border: 1px solid #00ff66; z-index: 200;
@@ -143,7 +164,6 @@ export class GuiLib {
 
         const ioRow = document.createElement('div');
         ioRow.className = 'gui-row';
-        ioRow.style.marginTop = '10px';
         
         const btnExport = document.createElement('button');
         btnExport.className = 'gui-button';
@@ -276,6 +296,7 @@ export class GuiLib {
         const name = params.name || prop;
         
         const div = document.createElement('div');
+        div.className = 'gui-control'; // Wrapper class for Flex/Gap
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
@@ -306,6 +327,7 @@ export class GuiLib {
         const name = params.name || prop;
 
         const div = document.createElement('div');
+        div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
@@ -347,6 +369,7 @@ export class GuiLib {
         const step = params.step !== undefined ? params.step : 0.01;
 
         const div = document.createElement('div');
+        div.className = 'gui-control'; // Wrapper for Flex/Gap
         const label = document.createElement('label');
         label.className = 'gui-label';
         const valSpan = document.createElement('span');
@@ -385,6 +408,7 @@ export class GuiLib {
         const name = params.name || prop;
 
         const div = document.createElement('div');
+        div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
@@ -415,7 +439,7 @@ export class GuiLib {
         const name = params.name || prop;
 
         const label = document.createElement('label');
-        label.className = 'gui-checkbox-row';
+        label.className = 'gui-checkbox-row'; // Already flex in CSS
         
         const input = document.createElement('input');
         input.className = 'gui-checkbox';
@@ -444,6 +468,7 @@ export class GuiLib {
         const options = params.options || {};
 
         const div = document.createElement('div');
+        div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
@@ -482,6 +507,26 @@ export class GuiLib {
         btn.className = 'gui-button';
         btn.innerText = text;
         btn.onclick = callback;
+        this.currentFolder.appendChild(btn);
+        return { style: btn.style };
+    }
+
+    // NEW: Botón de Pantalla Completa
+    addFullscreen(label = "TOGGLE FULLSCREEN") {
+        const btn = document.createElement('button');
+        btn.className = 'gui-button';
+        btn.innerText = label;
+        btn.onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
         this.currentFolder.appendChild(btn);
         return { style: btn.style };
     }
