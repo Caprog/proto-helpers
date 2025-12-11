@@ -1,12 +1,8 @@
 const styles = `
     #gui-panel {
-        position: absolute; 
-        top: 20px; 
-        left: 20px; 
-        width: 280px;
-        /* FIX: Alto dinámico con márgenes simétricos */
+        position: absolute; top: 20px; left: 20px; width: 280px;
+        /* Alto dinámico para evitar solapamientos en móviles o pantallas pequeñas */
         max-height: calc(100vh - 40px);
-        
         background: rgba(5, 16, 10, 0.9); backdrop-filter: blur(12px);
         padding: 20px; border-radius: 4px; border: 1px solid rgba(0, 255, 100, 0.3);
         color: #eee; overflow-y: auto;
@@ -15,18 +11,21 @@ const styles = `
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         box-sizing: border-box;
         
+        /* FLEX & GAP: Clave para la separación vertical correcta de elementos raíz */
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px; 
     }
     #gui-panel::-webkit-scrollbar { width: 6px; }
     #gui-panel::-webkit-scrollbar-track { background: rgba(0, 20, 10, 0.5); border-radius: 3px; }
     #gui-panel::-webkit-scrollbar-thumb { background: rgba(0, 255, 100, 0.2); border-radius: 3px; }
     
     .gui-folder { 
+        /* FLEX & GAP: Clave para la separación dentro de las carpetas */
         display: flex;
         flex-direction: column;
         gap: 12px;
+        
         margin-bottom: 15px; 
         border-bottom: 1px solid rgba(0, 255, 100, 0.2); 
         padding-bottom: 20px; 
@@ -34,97 +33,48 @@ const styles = `
     .gui-folder:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     
     .gui-folder h3 {
-        display: block; 
-        width: 100%;
-        margin: 0; 
+        display: block; width: 100%; margin: 0; 
         font-size: 14px; font-weight: 600; text-transform: uppercase;
         letter-spacing: 2px; color: #00ff66; text-shadow: 0 0 5px rgba(0, 255, 100, 0.5);
-        padding-bottom: 5px; 
-        border-bottom: 2px solid rgba(0,255,100,0.5);
+        padding-bottom: 5px; border-bottom: 2px solid rgba(0,255,100,0.5);
     }
     
-    .gui-control {
-        display: flex;
-        flex-direction: column;
-        gap: 6px; 
-        width: 100%;
-    }
-
-    .gui-label { 
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; 
-        margin: 0;
-    }
+    .gui-control { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .gui-label { display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; margin: 0; }
     
-    .gui-checkbox-row { 
-        display: flex;
-        align-items: center;
-        cursor: pointer; 
-        color: #eee; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; 
-        width: 100%;
-        margin: 0;
-    }
-    .gui-checkbox {
-        margin-right: 10px;
-        margin-top: 0; margin-bottom: 0;
-        transform: scale(1.2);
-    }
+    .gui-checkbox-row { display: flex; align-items: center; cursor: pointer; color: #eee; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin: 0; }
+    .gui-checkbox { margin-right: 10px; margin-top: 0; margin-bottom: 0; transform: scale(1.2); }
 
     .gui-slider { width: 100%; background: transparent; -webkit-appearance: none; margin: 0; display: block; }
     .gui-slider::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #1a3322; }
     .gui-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 6px; background: #00ff66; margin-top: -5px; cursor: pointer; box-shadow: 0 0 8px #00ff66; }
     
     .gui-color { width: 100%; height: 30px; border: 1px solid #224433; background: #000; cursor: pointer; padding: 2px; margin: 0; display: block; }
-    
     .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: monospace; outline: none; box-sizing: border-box; margin: 0; display: block; }
     .gui-text-input:focus { border-color: #00ff66; }
     
-    /* FIX: Estilo para el input numérico del slider */
     .gui-num-input {
-        background: rgba(0,0,0,0.3);
-        color: #00ff66;
-        border: 1px solid transparent;
-        font-family: monospace;
-        font-size: 11px;
-        text-align: right;
-        width: 60px;
-        padding: 2px 4px;
-        outline: none;
-        -moz-appearance: textfield; /* Firefox remove arrows */
+        background: rgba(0,0,0,0.3); color: #00ff66; border: 1px solid transparent;
+        font-family: monospace; font-size: 11px; text-align: right; width: 60px; padding: 2px 4px; outline: none;
+        -moz-appearance: textfield;
     }
-    .gui-num-input:hover, .gui-num-input:focus {
-        border-color: #00ff66;
-        background: #020804;
-    }
-    .gui-num-input::-webkit-outer-spin-button,
-    .gui-num-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+    .gui-num-input:hover, .gui-num-input:focus { border-color: #00ff66; background: #020804; }
+    .gui-num-input::-webkit-outer-spin-button, .gui-num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-    .gui-display { 
-        width: 100%; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff66; 
-        border-left: 2px solid #00ff66; font-family: monospace; font-size: 11px;
-        box-sizing: border-box; margin: 0;
-    }
-    
+    .gui-display { width: 100%; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff66; border-left: 2px solid #00ff66; font-family: monospace; font-size: 11px; box-sizing: border-box; margin: 0; }
     .gui-select { width: 100%; padding: 5px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: inherit; font-size: 11px; cursor: pointer; outline: none; text-transform: uppercase; box-sizing: border-box; margin: 0; }
-    
     .gui-separator { border-top: 1px dashed rgba(0,255,100,0.2); margin: 5px 0; width: 100%; }
     .gui-value { float: right; color: #00ff66; font-family: monospace; font-size: 11px; }
     
     .gui-button {
         width: 100%; padding: 12px; background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66;
         font-weight: bold; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-        cursor: pointer; transition: all 0.3s; margin-bottom: 5px;
+        cursor: pointer; transition: all 0.3s; margin: 0; /* Margin is handled by gap now */
     }
-    .gui-button:last-child { margin-bottom: 0; }
     .gui-button:hover { background: #00ff66; color: #000; box-shadow: 0 0 15px rgba(0, 255, 100, 0.6); }
     
     .gui-row { display: flex; gap: 8px; margin: 0; width: 100%; }
-    .gui-row .gui-button { flex: 1; margin-bottom: 0; }
+    .gui-row .gui-button { flex: 1; margin: 0; }
     
     .gui-modal {
         display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -152,6 +102,7 @@ export class GuiLib {
         this.storageKey = storageKey;
         this.onUpdate = onUpdate;
         
+        // --- CONFIG MANAGER FOLDER ---
         const managerDiv = document.createElement('div');
         managerDiv.className = 'gui-folder';
         
@@ -159,6 +110,7 @@ export class GuiLib {
         title.innerText = "CONFIG MANAGER";
         managerDiv.appendChild(title);
 
+        // Row 1: Select + Delete
         const row = document.createElement('div');
         row.className = 'gui-row';
         
@@ -181,12 +133,14 @@ export class GuiLib {
         row.appendChild(btnDelete);
         managerDiv.appendChild(row);
 
+        // Row 2: Save
         const btnSave = document.createElement('button');
         btnSave.className = 'gui-button';
         btnSave.innerText = 'SAVE CURRENT';
         btnSave.onclick = () => this.savePreset();
         managerDiv.appendChild(btnSave);
 
+        // Row 3: Import / Export
         const ioRow = document.createElement('div');
         ioRow.className = 'gui-row';
         
@@ -204,6 +158,20 @@ export class GuiLib {
         ioRow.appendChild(btnExport);
         managerDiv.appendChild(ioRow);
 
+        // Row 4: Fullscreen Button (AUTOMATICALLY INTEGRATED)
+        const btnFull = document.createElement('button');
+        btnFull.className = 'gui-button';
+        btnFull.innerText = 'TOGGLE FULLSCREEN';
+        btnFull.onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => console.warn(e));
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        };
+        managerDiv.appendChild(btnFull);
+
+        // Inject at top of panel
         if(this.container.firstChild) {
             this.container.insertBefore(managerDiv, this.container.firstChild);
         } else {
@@ -319,60 +287,47 @@ export class GuiLib {
 
     addText(obj, prop, params = {}) {
         const name = params.name || prop;
-        
         const div = document.createElement('div');
         div.className = 'gui-control'; 
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
-        
         const input = document.createElement('input');
         input.className = 'gui-text-input';
         input.type = 'text';
-        
         const update = () => { input.value = obj[prop]; };
-        
         input.addEventListener('input', (e) => {
             obj[prop] = e.target.value;
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
         div.appendChild(label);
         div.appendChild(input);
         this.currentFolder.appendChild(div);
-
         const controller = { update };
         this.controllers.push(controller);
         update();
-
         return { onChange: (fn) => { input.addEventListener('input', () => fn(obj[prop])); return this; } };
     }
 
     addDisplay(obj, prop, params = {}) {
         const name = params.name || prop;
-
         const div = document.createElement('div');
         div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
-        
         const display = document.createElement('div');
         display.className = 'gui-display';
-        
         const update = () => { 
             const val = obj[prop];
             display.innerText = typeof val === 'number' ? val.toFixed(3) : val;
         };
-
         div.appendChild(label);
         div.appendChild(display);
         this.currentFolder.appendChild(div);
-
         const controller = { update };
         this.controllers.push(controller);
         update();
-        
         return { 
             listen: () => {
                 const interval = setInterval(update, 100);
@@ -387,73 +342,51 @@ export class GuiLib {
         this.currentFolder.appendChild(div);
     }
 
-    // FIX: SLIDER WITH NUMBER INPUT
     addSlider(obj, prop, params = {}) {
         const name = params.name || prop;
         const min = params.min !== undefined ? params.min : 0;
         const max = params.max !== undefined ? params.max : 1;
         const step = params.step !== undefined ? params.step : 0.01;
-
         const div = document.createElement('div');
         div.className = 'gui-control'; 
-        
         const label = document.createElement('label');
         label.className = 'gui-label';
-        
-        // Texto Label
         const textSpan = document.createElement('span');
         textSpan.innerText = name;
         label.appendChild(textSpan);
-
-        // Input Numérico
         const numInput = document.createElement('input');
         numInput.type = 'number';
         numInput.className = 'gui-num-input';
-        numInput.min = min;
-        numInput.max = max;
-        numInput.step = step;
+        numInput.min = min; numInput.max = max; numInput.step = step;
         label.appendChild(numInput);
-        
-        // Slider (Range)
         const slider = document.createElement('input');
         slider.className = 'gui-slider';
         slider.type = 'range';
         slider.min = min; slider.max = max; slider.step = step;
-        
         const updateDisplay = () => {
             const val = parseFloat(obj[prop]);
             slider.value = val;
-            // Format number for display but keep precision
             numInput.value = Math.round(val * 1000) / 1000; 
         };
-        
-        // Evento Slider -> Modelo & Numero
         slider.addEventListener('input', (e) => {
             obj[prop] = parseFloat(e.target.value);
             updateDisplay();
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
-        // Evento Numero -> Modelo & Slider
         numInput.addEventListener('change', (e) => {
             let val = parseFloat(e.target.value);
-            // Validación de límites
             if (val < min) val = min;
             if (val > max) val = max;
-            
             obj[prop] = val;
             updateDisplay();
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
         div.appendChild(label);
         div.appendChild(slider);
         this.currentFolder.appendChild(div);
-
         const controller = { update: updateDisplay };
         this.controllers.push(controller);
         updateDisplay();
-
         return { onChange: (fn) => { 
             slider.addEventListener('input', () => fn(obj[prop])); 
             numInput.addEventListener('change', () => fn(obj[prop]));
@@ -463,76 +396,59 @@ export class GuiLib {
 
     addColor(obj, prop, params = {}) {
         const name = params.name || prop;
-
         const div = document.createElement('div');
         div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
-        
         const input = document.createElement('input');
         input.className = 'gui-color';
         input.type = 'color';
-        
         const update = () => { input.value = obj[prop]; };
-        
         input.addEventListener('input', (e) => {
             obj[prop] = e.target.value;
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
         div.appendChild(label);
         div.appendChild(input);
         this.currentFolder.appendChild(div);
-
         const controller = { update };
         this.controllers.push(controller);
         update();
-
         return { onChange: (fn) => { input.addEventListener('input', () => fn(obj[prop])); return this; } };
     }
 
     addBoolean(obj, prop, params = {}) {
         const name = params.name || prop;
-
         const label = document.createElement('label');
-        label.className = 'gui-checkbox-row'; // Already flex in CSS
-        
+        label.className = 'gui-checkbox-row'; 
         const input = document.createElement('input');
         input.className = 'gui-checkbox';
         input.type = 'checkbox';
-        
         const update = () => { input.checked = obj[prop]; };
-        
         input.addEventListener('change', (e) => {
             obj[prop] = e.target.checked;
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
         label.appendChild(input);
         label.appendChild(document.createTextNode(name));
         this.currentFolder.appendChild(label);
-
         const controller = { update };
         this.controllers.push(controller);
         update();
-
         return { onChange: (fn) => { input.addEventListener('change', () => fn(obj[prop])); return this; } };
     }
 
     addSelect(obj, prop, params = {}) {
         const name = params.name || prop;
         const options = params.options || {};
-
         const div = document.createElement('div');
         div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
-        
         const select = document.createElement('select');
         select.className = 'gui-select';
-        
         const isArray = Array.isArray(options);
         (isArray ? options : Object.keys(options)).forEach((k, i) => {
             const opt = document.createElement('option');
@@ -540,22 +456,17 @@ export class GuiLib {
             opt.innerText = k;
             select.appendChild(opt);
         });
-
         const update = () => { select.value = obj[prop]; };
-        
         select.addEventListener('change', (e) => {
             obj[prop] = parseInt(e.target.value);
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
-
         div.appendChild(label);
         div.appendChild(select);
         this.currentFolder.appendChild(div);
-
         const controller = { update };
         this.controllers.push(controller);
         update();
-
         return { onChange: (fn) => { select.addEventListener('change', () => fn(obj[prop])); return this; } };
     }
 
@@ -568,36 +479,30 @@ export class GuiLib {
         return { style: btn.style };
     }
 
-    // Botón de Pantalla Completa
     addFullscreen(label = "TOGGLE FULLSCREEN") {
+        // Method kept for manual usage if needed, but primarily used internally now.
         const btn = document.createElement('button');
         btn.className = 'gui-button';
         btn.innerText = label;
         btn.onclick = () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.warn(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
+                document.documentElement.requestFullscreen().catch(err => console.warn(err));
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen();
             }
         };
         this.currentFolder.appendChild(btn);
-        return { style: btn.style };
+        return { style: btn.style }; 
     }
 
     createModal(id, title, placeholder, actionText, actionFn) {
         const d = document.createElement('div');
         d.id = id; d.className = 'gui-modal';
         d.innerHTML = `<h4 style="color:#00ff66;margin:0;font-family:monospace">${title}</h4>`;
-        
         const txt = document.createElement('textarea');
         txt.className = 'gui-textarea';
         if(placeholder) txt.placeholder = placeholder;
         d.appendChild(txt);
-
         if(actionText) {
             const b = document.createElement('button');
             b.className = 'gui-button';
@@ -606,13 +511,11 @@ export class GuiLib {
             b.onclick = () => actionFn(txt);
             d.appendChild(b);
         }
-        
         const c = document.createElement('button');
         c.className = 'gui-modal-close';
         c.innerText = 'CLOSE';
         c.onclick = () => d.style.display = 'none';
         d.appendChild(c);
-        
         document.body.appendChild(d);
         return d;
     }
