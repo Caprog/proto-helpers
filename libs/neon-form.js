@@ -1,7 +1,6 @@
 const styles = `
     #gui-panel {
         position: absolute; top: 20px; left: 20px; width: 280px;
-        /* Alto dinámico para evitar solapamientos en móviles o pantallas pequeñas */
         max-height: calc(100vh - 40px);
         background: rgba(5, 16, 10, 0.9); backdrop-filter: blur(12px);
         padding: 20px; border-radius: 4px; border: 1px solid rgba(0, 255, 100, 0.3);
@@ -10,25 +9,15 @@ const styles = `
         user-select: none; -webkit-user-select: none;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         box-sizing: border-box;
-        
-        /* FLEX & GAP: Clave para la separación vertical correcta de elementos raíz */
-        display: flex;
-        flex-direction: column;
-        gap: 12px; 
+        display: flex; flex-direction: column; gap: 12px; 
     }
     #gui-panel::-webkit-scrollbar { width: 6px; }
     #gui-panel::-webkit-scrollbar-track { background: rgba(0, 20, 10, 0.5); border-radius: 3px; }
     #gui-panel::-webkit-scrollbar-thumb { background: rgba(0, 255, 100, 0.2); border-radius: 3px; }
     
     .gui-folder { 
-        /* FLEX & GAP: Clave para la separación dentro de las carpetas */
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        
-        margin-bottom: 15px; 
-        border-bottom: 1px solid rgba(0, 255, 100, 0.2); 
-        padding-bottom: 20px; 
+        display: flex; flex-direction: column; gap: 12px;
+        margin-bottom: 15px; border-bottom: 1px solid rgba(0, 255, 100, 0.2); padding-bottom: 20px; 
     }
     .gui-folder:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     
@@ -69,7 +58,7 @@ const styles = `
     .gui-button {
         width: 100%; padding: 12px; background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66;
         font-weight: bold; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-        cursor: pointer; transition: all 0.3s; margin: 0; /* Margin is handled by gap now */
+        cursor: pointer; transition: all 0.3s; margin: 0;
     }
     .gui-button:hover { background: #00ff66; color: #000; box-shadow: 0 0 15px rgba(0, 255, 100, 0.6); }
     
@@ -95,6 +84,20 @@ export class GuiLib {
         this.currentFolder = this.container;
         this.controllers = [];
         this.onChangeCallback = null;
+        // Inicializamos la notificación global con debounce de 200ms
+        this.notifyGlobal = this.debounce((p, v) => {
+            if (this.onChangeCallback) this.onChangeCallback(p, v);
+        }, 200);
+    }
+
+    // --- DEBOUNCE UTILITY ---
+    debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
     }
 
     enableManagement(configRef, storageKey, onUpdate) {
@@ -102,7 +105,6 @@ export class GuiLib {
         this.storageKey = storageKey;
         this.onUpdate = onUpdate;
         
-        // --- CONFIG MANAGER FOLDER ---
         const managerDiv = document.createElement('div');
         managerDiv.className = 'gui-folder';
         
@@ -110,7 +112,6 @@ export class GuiLib {
         title.innerText = "CONFIG MANAGER";
         managerDiv.appendChild(title);
 
-        // Row 1: Select + Delete
         const row = document.createElement('div');
         row.className = 'gui-row';
         
@@ -133,14 +134,12 @@ export class GuiLib {
         row.appendChild(btnDelete);
         managerDiv.appendChild(row);
 
-        // Row 2: Save
         const btnSave = document.createElement('button');
         btnSave.className = 'gui-button';
         btnSave.innerText = 'SAVE CURRENT';
         btnSave.onclick = () => this.savePreset();
         managerDiv.appendChild(btnSave);
 
-        // Row 3: Import / Export
         const ioRow = document.createElement('div');
         ioRow.className = 'gui-row';
         
@@ -158,7 +157,6 @@ export class GuiLib {
         ioRow.appendChild(btnExport);
         managerDiv.appendChild(ioRow);
 
-        // Row 4: Fullscreen Button (AUTOMATICALLY INTEGRATED)
         const btnFull = document.createElement('button');
         btnFull.className = 'gui-button';
         btnFull.innerText = 'TOGGLE FULLSCREEN';
@@ -171,7 +169,6 @@ export class GuiLib {
         };
         managerDiv.appendChild(btnFull);
 
-        // Inject at top of panel
         if(this.container.firstChild) {
             this.container.insertBefore(managerDiv, this.container.firstChild);
         } else {
@@ -295,18 +292,27 @@ export class GuiLib {
         const input = document.createElement('input');
         input.className = 'gui-text-input';
         input.type = 'text';
+        
         const update = () => { input.value = obj[prop]; };
+        
         input.addEventListener('input', (e) => {
             obj[prop] = e.target.value;
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+            // Actualización local inmediata, notificación global debounced
+            this.notifyGlobal(prop, obj[prop]);
         });
+
         div.appendChild(label);
         div.appendChild(input);
         this.currentFolder.appendChild(div);
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { input.addEventListener('input', () => fn(obj[prop])); return this; } };
+        
+        return { onChange: (fn) => { 
+            const dFn = this.debounce(fn, 200);
+            input.addEventListener('input', () => dFn(obj[prop])); 
+            return this; 
+        }};
     }
 
     addDisplay(obj, prop, params = {}) {
@@ -318,6 +324,7 @@ export class GuiLib {
         label.innerText = name;
         const display = document.createElement('div');
         display.className = 'gui-display';
+        
         const update = () => { 
             const val = obj[prop];
             display.innerText = typeof val === 'number' ? val.toFixed(3) : val;
@@ -363,33 +370,38 @@ export class GuiLib {
         slider.className = 'gui-slider';
         slider.type = 'range';
         slider.min = min; slider.max = max; slider.step = step;
+        
         const updateDisplay = () => {
             const val = parseFloat(obj[prop]);
             slider.value = val;
             numInput.value = Math.round(val * 1000) / 1000; 
         };
-        slider.addEventListener('input', (e) => {
-            obj[prop] = parseFloat(e.target.value);
+        
+        const onInput = (val) => {
+            obj[prop] = val;
             updateDisplay();
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
-        });
+            this.notifyGlobal(prop, obj[prop]);
+        };
+
+        slider.addEventListener('input', (e) => onInput(parseFloat(e.target.value)));
         numInput.addEventListener('change', (e) => {
             let val = parseFloat(e.target.value);
             if (val < min) val = min;
             if (val > max) val = max;
-            obj[prop] = val;
-            updateDisplay();
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+            onInput(val);
         });
+
         div.appendChild(label);
         div.appendChild(slider);
         this.currentFolder.appendChild(div);
         const controller = { update: updateDisplay };
         this.controllers.push(controller);
         updateDisplay();
+        
         return { onChange: (fn) => { 
-            slider.addEventListener('input', () => fn(obj[prop])); 
-            numInput.addEventListener('change', () => fn(obj[prop]));
+            const dFn = this.debounce(fn, 200);
+            slider.addEventListener('input', () => dFn(obj[prop])); 
+            numInput.addEventListener('change', () => dFn(obj[prop]));
             return this; 
         }};
     }
@@ -407,7 +419,7 @@ export class GuiLib {
         const update = () => { input.value = obj[prop]; };
         input.addEventListener('input', (e) => {
             obj[prop] = e.target.value;
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+            this.notifyGlobal(prop, obj[prop]);
         });
         div.appendChild(label);
         div.appendChild(input);
@@ -415,7 +427,11 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { input.addEventListener('input', () => fn(obj[prop])); return this; } };
+        return { onChange: (fn) => { 
+            const dFn = this.debounce(fn, 200);
+            input.addEventListener('input', () => dFn(obj[prop])); 
+            return this; 
+        }};
     }
 
     addBoolean(obj, prop, params = {}) {
@@ -428,7 +444,7 @@ export class GuiLib {
         const update = () => { input.checked = obj[prop]; };
         input.addEventListener('change', (e) => {
             obj[prop] = e.target.checked;
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+            this.notifyGlobal(prop, obj[prop]);
         });
         label.appendChild(input);
         label.appendChild(document.createTextNode(name));
@@ -436,7 +452,11 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { input.addEventListener('change', () => fn(obj[prop])); return this; } };
+        return { onChange: (fn) => { 
+            const dFn = this.debounce(fn, 200);
+            input.addEventListener('change', () => dFn(obj[prop])); 
+            return this; 
+        }};
     }
 
     addSelect(obj, prop, params = {}) {
@@ -459,7 +479,7 @@ export class GuiLib {
         const update = () => { select.value = obj[prop]; };
         select.addEventListener('change', (e) => {
             obj[prop] = parseInt(e.target.value);
-            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+            this.notifyGlobal(prop, obj[prop]);
         });
         div.appendChild(label);
         div.appendChild(select);
@@ -467,7 +487,11 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { select.addEventListener('change', () => fn(obj[prop])); return this; } };
+        return { onChange: (fn) => { 
+            const dFn = this.debounce(fn, 200);
+            select.addEventListener('change', () => dFn(obj[prop])); 
+            return this; 
+        }};
     }
 
     addButton(text, callback) {
@@ -479,22 +503,7 @@ export class GuiLib {
         return { style: btn.style };
     }
 
-    addFullscreen(label = "TOGGLE FULLSCREEN") {
-        // Method kept for manual usage if needed, but primarily used internally now.
-        const btn = document.createElement('button');
-        btn.className = 'gui-button';
-        btn.innerText = label;
-        btn.onclick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => console.warn(err));
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        };
-        this.currentFolder.appendChild(btn);
-        return { style: btn.style }; 
-    }
-
+    // Not using internal addFullscreen here as it is embedded in Management
     createModal(id, title, placeholder, actionText, actionFn) {
         const d = document.createElement('div');
         d.id = id; d.className = 'gui-modal';
