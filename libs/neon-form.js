@@ -1,15 +1,20 @@
 const styles = `
     #gui-panel {
-        position: absolute; top: 20px; left: 20px; width: 280px;
+        position: absolute; 
+        top: 20px; 
+        left: 20px; 
+        width: 280px;
+        /* FIX: Alto dinámico con márgenes simétricos */
+        max-height: calc(100vh - 40px);
+        
         background: rgba(5, 16, 10, 0.9); backdrop-filter: blur(12px);
         padding: 20px; border-radius: 4px; border: 1px solid rgba(0, 255, 100, 0.3);
-        color: #eee; max-height: 90vh; overflow-y: auto;
+        color: #eee; overflow-y: auto;
         box-shadow: 0 0 20px rgba(0, 255, 100, 0.15); z-index: 100;
         user-select: none; -webkit-user-select: none;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         box-sizing: border-box;
         
-        /* FIX: Aplicar Flex y Gap al contenedor principal para separar botones sueltos */
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -18,14 +23,10 @@ const styles = `
     #gui-panel::-webkit-scrollbar-track { background: rgba(0, 20, 10, 0.5); border-radius: 3px; }
     #gui-panel::-webkit-scrollbar-thumb { background: rgba(0, 255, 100, 0.2); border-radius: 3px; }
     
-    /* --- FLEX LAYOUT & GAP UPDATES --- */
-    
     .gui-folder { 
         display: flex;
         flex-direction: column;
         gap: 12px;
-        
-        /* Separación visual entre carpetas */
         margin-bottom: 15px; 
         border-bottom: 1px solid rgba(0, 255, 100, 0.2); 
         padding-bottom: 20px; 
@@ -50,7 +51,9 @@ const styles = `
     }
 
     .gui-label { 
-        display: block; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8fb59a; 
         margin: 0;
     }
@@ -78,6 +81,29 @@ const styles = `
     .gui-text-input { width: 100%; padding: 6px; background: #020804; color: #00ff66; border: 1px solid #224433; font-family: monospace; outline: none; box-sizing: border-box; margin: 0; display: block; }
     .gui-text-input:focus { border-color: #00ff66; }
     
+    /* FIX: Estilo para el input numérico del slider */
+    .gui-num-input {
+        background: rgba(0,0,0,0.3);
+        color: #00ff66;
+        border: 1px solid transparent;
+        font-family: monospace;
+        font-size: 11px;
+        text-align: right;
+        width: 60px;
+        padding: 2px 4px;
+        outline: none;
+        -moz-appearance: textfield; /* Firefox remove arrows */
+    }
+    .gui-num-input:hover, .gui-num-input:focus {
+        border-color: #00ff66;
+        background: #020804;
+    }
+    .gui-num-input::-webkit-outer-spin-button,
+    .gui-num-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
     .gui-display { 
         width: 100%; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff66; 
         border-left: 2px solid #00ff66; font-family: monospace; font-size: 11px;
@@ -89,7 +115,6 @@ const styles = `
     .gui-separator { border-top: 1px dashed rgba(0,255,100,0.2); margin: 5px 0; width: 100%; }
     .gui-value { float: right; color: #00ff66; font-family: monospace; font-size: 11px; }
     
-    /* FIX: Margen extra en botones para asegurar separación visual si el gap falla */
     .gui-button {
         width: 100%; padding: 12px; background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66;
         font-weight: bold; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
@@ -296,7 +321,7 @@ export class GuiLib {
         const name = params.name || prop;
         
         const div = document.createElement('div');
-        div.className = 'gui-control'; // Wrapper class for Flex/Gap
+        div.className = 'gui-control'; 
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
@@ -362,6 +387,7 @@ export class GuiLib {
         this.currentFolder.appendChild(div);
     }
 
+    // FIX: SLIDER WITH NUMBER INPUT
     addSlider(obj, prop, params = {}) {
         const name = params.name || prop;
         const min = params.min !== undefined ? params.min : 0;
@@ -369,39 +395,70 @@ export class GuiLib {
         const step = params.step !== undefined ? params.step : 0.01;
 
         const div = document.createElement('div');
-        div.className = 'gui-control'; // Wrapper for Flex/Gap
+        div.className = 'gui-control'; 
+        
         const label = document.createElement('label');
         label.className = 'gui-label';
-        const valSpan = document.createElement('span');
-        valSpan.className = 'gui-value';
-        label.innerHTML = name;
-        label.appendChild(valSpan);
         
-        const input = document.createElement('input');
-        input.className = 'gui-slider';
-        input.type = 'range';
-        input.min = min; input.max = max; input.step = step;
+        // Texto Label
+        const textSpan = document.createElement('span');
+        textSpan.innerText = name;
+        label.appendChild(textSpan);
+
+        // Input Numérico
+        const numInput = document.createElement('input');
+        numInput.type = 'number';
+        numInput.className = 'gui-num-input';
+        numInput.min = min;
+        numInput.max = max;
+        numInput.step = step;
+        label.appendChild(numInput);
         
-        const update = () => {
-            input.value = obj[prop];
-            valSpan.innerText = typeof obj[prop] === 'number' ? obj[prop].toFixed(3).replace(/\.?0+$/, '') : obj[prop];
+        // Slider (Range)
+        const slider = document.createElement('input');
+        slider.className = 'gui-slider';
+        slider.type = 'range';
+        slider.min = min; slider.max = max; slider.step = step;
+        
+        const updateDisplay = () => {
+            const val = parseFloat(obj[prop]);
+            slider.value = val;
+            // Format number for display but keep precision
+            numInput.value = Math.round(val * 1000) / 1000; 
         };
         
-        input.addEventListener('input', (e) => {
+        // Evento Slider -> Modelo & Numero
+        slider.addEventListener('input', (e) => {
             obj[prop] = parseFloat(e.target.value);
-            update();
+            updateDisplay();
+            if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
+        });
+
+        // Evento Numero -> Modelo & Slider
+        numInput.addEventListener('change', (e) => {
+            let val = parseFloat(e.target.value);
+            // Validación de límites
+            if (val < min) val = min;
+            if (val > max) val = max;
+            
+            obj[prop] = val;
+            updateDisplay();
             if(this.onChangeCallback) this.onChangeCallback(prop, obj[prop]);
         });
 
         div.appendChild(label);
-        div.appendChild(input);
+        div.appendChild(slider);
         this.currentFolder.appendChild(div);
 
-        const controller = { update };
+        const controller = { update: updateDisplay };
         this.controllers.push(controller);
-        update();
+        updateDisplay();
 
-        return { onChange: (fn) => { input.addEventListener('input', () => fn(obj[prop])); return this; } };
+        return { onChange: (fn) => { 
+            slider.addEventListener('input', () => fn(obj[prop])); 
+            numInput.addEventListener('change', () => fn(obj[prop]));
+            return this; 
+        }};
     }
 
     addColor(obj, prop, params = {}) {
@@ -511,7 +568,7 @@ export class GuiLib {
         return { style: btn.style };
     }
 
-    // NEW: Botón de Pantalla Completa
+    // Botón de Pantalla Completa
     addFullscreen(label = "TOGGLE FULLSCREEN") {
         const btn = document.createElement('button');
         btn.className = 'gui-button';
