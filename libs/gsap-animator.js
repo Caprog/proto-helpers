@@ -51,14 +51,22 @@ export class GSAPAnimator {
     async #run() {
         this.busy = true;
         while (this.nextTask) {
-            const { state, data } = this.nextTask;
+            const current = this.nextTask;
             this.nextTask = null;
+
             const el = document.querySelector(this.selector);
-            const steps = this.animations[state];
+            const steps = this.animations[current.state];
             if (!steps || !el) continue;
+
             for (const step of steps) {
-                const props = await this.#parse(step.props, data);
-                await gsap[step.direction || 'to'](el, { ...this.config, ...props });
+                const props = await this.#parse(step.props, current.data);
+                await new Promise((resolve) => {
+                    gsap[step.direction || 'to'](el, {
+                        ...this.config,
+                        ...props,
+                        onComplete: resolve
+                    });
+                });
             }
         }
         this.busy = false;
