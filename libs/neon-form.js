@@ -93,7 +93,7 @@ export class GuiLib {
     // --- DEBOUNCE UTILITY ---
     debounce(func, wait) {
         let timeout;
-        return function(...args) {
+        return function (...args) {
             const context = this;
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(context, args), wait);
@@ -104,17 +104,17 @@ export class GuiLib {
         this.configRef = configRef;
         this.storageKey = storageKey;
         this.onUpdate = onUpdate;
-        
+
         const managerDiv = document.createElement('div');
         managerDiv.className = 'gui-folder';
-        
+
         const title = document.createElement('h3');
         title.innerText = "CONFIG MANAGER";
         managerDiv.appendChild(title);
 
         const row = document.createElement('div');
         row.className = 'gui-row';
-        
+
         this.presetSelect = document.createElement('select');
         this.presetSelect.className = 'gui-select';
         this.presetSelect.style.marginBottom = '0';
@@ -124,9 +124,9 @@ export class GuiLib {
         const btnDelete = document.createElement('button');
         btnDelete.className = 'gui-button';
         btnDelete.innerText = 'X';
-        btnDelete.style.width = '40px'; 
-        btnDelete.style.background = 'rgba(255,0,0,0.1)'; 
-        btnDelete.style.borderColor = '#ff3333'; 
+        btnDelete.style.width = '40px';
+        btnDelete.style.background = 'rgba(255,0,0,0.1)';
+        btnDelete.style.borderColor = '#ff3333';
         btnDelete.style.color = '#ff3333';
         btnDelete.onclick = () => this.deletePreset();
 
@@ -142,7 +142,7 @@ export class GuiLib {
 
         const ioRow = document.createElement('div');
         ioRow.className = 'gui-row';
-        
+
         const btnExport = document.createElement('button');
         btnExport.className = 'gui-button';
         btnExport.innerText = 'EXPORT';
@@ -169,7 +169,7 @@ export class GuiLib {
         };
         managerDiv.appendChild(btnFull);
 
-        if(this.container.firstChild) {
+        if (this.container.firstChild) {
             this.container.insertBefore(managerDiv, this.container.firstChild);
         } else {
             this.container.appendChild(managerDiv);
@@ -181,19 +181,41 @@ export class GuiLib {
 
     initModals() {
         this.exportModal = this.createModal('gui-export', 'EXPORT JSON', null, null, null);
+
+        // Add Copy Button
+        const btnCopy = document.createElement('button');
+        btnCopy.className = 'gui-button';
+        btnCopy.innerText = 'COPY JSON';
+        btnCopy.style.marginTop = '10px';
+        btnCopy.onclick = () => {
+            const txt = this.exportModal.querySelector('textarea');
+            txt.select();
+            txt.setSelectionRange(0, 99999); // Mobile
+            navigator.clipboard.writeText(txt.value).then(() => {
+                const prev = btnCopy.innerText;
+                btnCopy.innerText = 'COPIED!';
+                setTimeout(() => btnCopy.innerText = prev, 1500);
+            }).catch(err => {
+                console.error("Clipboard failed", err);
+                document.execCommand('copy');
+            });
+        };
+        // Insert before close button
+        this.exportModal.insertBefore(btnCopy, this.exportModal.lastChild);
+
         this.importModal = this.createModal('gui-import', 'IMPORT JSON', 'Paste JSON here...', 'LOAD', (textarea) => {
             try {
                 const data = JSON.parse(textarea.value);
                 this.applyData(data);
                 this.importModal.style.display = 'none';
                 textarea.value = '';
-            } catch(e) { alert("Invalid JSON"); }
+            } catch (e) { alert("Invalid JSON"); }
         });
     }
 
     savePreset() {
         const name = prompt("Preset Name:");
-        if(!name) return;
+        if (!name) return;
         const store = this.getStorage();
         store[name] = { ...this.configRef };
         localStorage.setItem(this.storageKey, JSON.stringify(store));
@@ -202,15 +224,15 @@ export class GuiLib {
     }
 
     loadPreset(name) {
-        if(!name) return;
+        if (!name) return;
         const store = this.getStorage();
-        if(store[name]) this.applyData(store[name]);
+        if (store[name]) this.applyData(store[name]);
     }
 
     deletePreset() {
         const name = this.presetSelect.value;
-        if(!name) return;
-        if(confirm(`Delete ${name}?`)) {
+        if (!name) return;
+        if (confirm(`Delete ${name}?`)) {
             const store = this.getStorage();
             delete store[name];
             localStorage.setItem(this.storageKey, JSON.stringify(store));
@@ -245,7 +267,7 @@ export class GuiLib {
     applyData(newData) {
         Object.assign(this.configRef, newData);
         this.updateDisplay();
-        if(this.onUpdate) this.onUpdate();
+        if (this.onUpdate) this.onUpdate();
     }
 
     updateDisplay() {
@@ -285,16 +307,16 @@ export class GuiLib {
     addText(obj, prop, params = {}) {
         const name = params.name || prop;
         const div = document.createElement('div');
-        div.className = 'gui-control'; 
+        div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         label.innerText = name;
         const input = document.createElement('input');
         input.className = 'gui-text-input';
         input.type = 'text';
-        
+
         const update = () => { input.value = obj[prop]; };
-        
+
         input.addEventListener('input', (e) => {
             obj[prop] = e.target.value;
             // Actualización local inmediata, notificación global debounced
@@ -307,12 +329,14 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        
-        return { onChange: (fn) => { 
-            const dFn = this.debounce(fn, 200);
-            input.addEventListener('input', () => dFn(obj[prop])); 
-            return this; 
-        }};
+
+        return {
+            onChange: (fn) => {
+                const dFn = this.debounce(fn, 200);
+                input.addEventListener('input', () => dFn(obj[prop]));
+                return this;
+            }
+        };
     }
 
     addDisplay(obj, prop, params = {}) {
@@ -324,8 +348,8 @@ export class GuiLib {
         label.innerText = name;
         const display = document.createElement('div');
         display.className = 'gui-display';
-        
-        const update = () => { 
+
+        const update = () => {
             const val = obj[prop];
             display.innerText = typeof val === 'number' ? val.toFixed(3) : val;
         };
@@ -335,7 +359,7 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { 
+        return {
             listen: () => {
                 const interval = setInterval(update, 100);
                 return () => clearInterval(interval);
@@ -355,7 +379,7 @@ export class GuiLib {
         const max = params.max !== undefined ? params.max : 1;
         const step = params.step !== undefined ? params.step : 0.01;
         const div = document.createElement('div');
-        div.className = 'gui-control'; 
+        div.className = 'gui-control';
         const label = document.createElement('label');
         label.className = 'gui-label';
         const textSpan = document.createElement('span');
@@ -370,13 +394,13 @@ export class GuiLib {
         slider.className = 'gui-slider';
         slider.type = 'range';
         slider.min = min; slider.max = max; slider.step = step;
-        
+
         const updateDisplay = () => {
             const val = parseFloat(obj[prop]);
             slider.value = val;
-            numInput.value = Math.round(val * 1000) / 1000; 
+            numInput.value = Math.round(val * 1000) / 1000;
         };
-        
+
         const onInput = (val) => {
             obj[prop] = val;
             updateDisplay();
@@ -397,13 +421,15 @@ export class GuiLib {
         const controller = { update: updateDisplay };
         this.controllers.push(controller);
         updateDisplay();
-        
-        return { onChange: (fn) => { 
-            const dFn = this.debounce(fn, 200);
-            slider.addEventListener('input', () => dFn(obj[prop])); 
-            numInput.addEventListener('change', () => dFn(obj[prop]));
-            return this; 
-        }};
+
+        return {
+            onChange: (fn) => {
+                const dFn = this.debounce(fn, 200);
+                slider.addEventListener('input', () => dFn(obj[prop]));
+                numInput.addEventListener('change', () => dFn(obj[prop]));
+                return this;
+            }
+        };
     }
 
     addColor(obj, prop, params = {}) {
@@ -427,17 +453,19 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { 
-            const dFn = this.debounce(fn, 200);
-            input.addEventListener('input', () => dFn(obj[prop])); 
-            return this; 
-        }};
+        return {
+            onChange: (fn) => {
+                const dFn = this.debounce(fn, 200);
+                input.addEventListener('input', () => dFn(obj[prop]));
+                return this;
+            }
+        };
     }
 
     addBoolean(obj, prop, params = {}) {
         const name = params.name || prop;
         const label = document.createElement('label');
-        label.className = 'gui-checkbox-row'; 
+        label.className = 'gui-checkbox-row';
         const input = document.createElement('input');
         input.className = 'gui-checkbox';
         input.type = 'checkbox';
@@ -452,11 +480,13 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { 
-            const dFn = this.debounce(fn, 200);
-            input.addEventListener('change', () => dFn(obj[prop])); 
-            return this; 
-        }};
+        return {
+            onChange: (fn) => {
+                const dFn = this.debounce(fn, 200);
+                input.addEventListener('change', () => dFn(obj[prop]));
+                return this;
+            }
+        };
     }
 
     addSelect(obj, prop, params = {}) {
@@ -487,11 +517,13 @@ export class GuiLib {
         const controller = { update };
         this.controllers.push(controller);
         update();
-        return { onChange: (fn) => { 
-            const dFn = this.debounce(fn, 200);
-            select.addEventListener('change', () => dFn(obj[prop])); 
-            return this; 
-        }};
+        return {
+            onChange: (fn) => {
+                const dFn = this.debounce(fn, 200);
+                select.addEventListener('change', () => dFn(obj[prop]));
+                return this;
+            }
+        };
     }
 
     addButton(text, callback) {
@@ -510,9 +542,9 @@ export class GuiLib {
         d.innerHTML = `<h4 style="color:#00ff66;margin:0;font-family:monospace">${title}</h4>`;
         const txt = document.createElement('textarea');
         txt.className = 'gui-textarea';
-        if(placeholder) txt.placeholder = placeholder;
+        if (placeholder) txt.placeholder = placeholder;
         d.appendChild(txt);
-        if(actionText) {
+        if (actionText) {
             const b = document.createElement('button');
             b.className = 'gui-button';
             b.innerText = actionText;
