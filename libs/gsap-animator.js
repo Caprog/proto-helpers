@@ -98,8 +98,6 @@ export class GSAPAnimator {
 
             for (const step of stepsArray) {
                 const props = await this.#parse(step.props, current.data);
-                
-                // Clean props: Remove internal logic keys to avoid GSAP warnings
                 const { cancelable, ...gsapProps } = props;
 
                 await new Promise((resolve) => {
@@ -107,6 +105,10 @@ export class GSAPAnimator {
                     gsap[step.direction || 'to'](el, {
                         ...this.defaults,
                         ...gsapProps,
+                        // ESTO ES LO NUEVO: Dispara el callback al iniciar el movimiento
+                        onStart: () => {
+                            if (this.onStepStart) this.onStepStart(current.state);
+                        },
                         onComplete: () => {
                             this.resolver = null;
                             resolve();
