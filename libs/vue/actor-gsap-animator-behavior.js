@@ -1,3 +1,5 @@
+import { GSAPAnimator } from "../gsap-animator";
+
 export function useGSAPAnimator(targetRef, actor, animations) {
     let animator = null;
 
