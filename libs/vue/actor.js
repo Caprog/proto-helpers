@@ -51,7 +51,7 @@ export class Actor {
     use(behavior, ...args) {
         if (this.debug) console.log(`%c[Actor] Equipping Behavior: ${behavior.name}`, "color: #facc15;");
         // Ahora pasamos 'this' (el actor) en lugar de solo 'state$'
-        behavior(this.el, this, ...args);
+        behavior(this.el, this.state$, ...args);
         return this;
     }
 
