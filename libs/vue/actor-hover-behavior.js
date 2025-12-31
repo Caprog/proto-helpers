@@ -1,15 +1,15 @@
 const { onMounted, onUnmounted } = Vue;
 
-export function useHoverBehavior(targetRef, state$) {
+export function useHoverBehavior(targetRef, actor) {
     const handleEnter = () => {
-        if (state$.value.state !== 'dragging') {
-            state$.patch({ state: 'hover' });
+        if (actor.current.value.state !== 'dragging') {
+            actor.state$.patch({ state: 'hover' });
         }
     };
 
     const handleLeave = () => {
-        if (state$.value.state !== 'dragging') {
-            state$.patch({ state: 'idle' });
+        if (actor.current.value.state !== 'dragging') {
+            actor.state$.patch({ state: 'idle' });
         }
     };
 
