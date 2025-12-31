@@ -46,6 +46,7 @@ export class GSAPAnimator {
     }
 
     async animate(state, data) {
+        console.debug('Animating', this.selector, state, data);
         const el = document.querySelector(this.selector);
         const steps = this.animations[state];
         if (!steps || !el) return;
