@@ -1,4 +1,4 @@
-import { GSAPAnimator } from 'https://cdn.jsdelivr.net/gh/Caprog/proto-helpers@main/libs/gsap-animator.js';
+import { GSAPAnimator } from '../gsap-animator.js';
 
 const { onMounted, onUnmounted } = Vue;
 
