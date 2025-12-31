@@ -5,19 +5,26 @@ export class GSAPAnimator {
     constructor(selector, animations, config = {}) {
         this.selector = selector;
         this.animations = animations;
-        this.config = {
-            ease: 'power3.out',
-            duration: 0.5,
-            force3D: true,
-            cancelable: false, // Por defecto no cancelable
-            ...config
+        
+        // Internal settings for the animator logic
+        this.settings = {
+            cancelable: config.cancelable ?? false
         };
+
+        // Default properties for GSAP tweens
+        this.defaults = {
+            ease: config.ease || 'power3.out',
+            duration: config.duration || 0.5,
+            force3D: config.force3D ?? true
+        };
+
         this.helpers = {
             clamp: (val, min, max) => Math.min(Math.max(val, min), max)
         };
+        
         this.busy = false;
         this.nextTask = null;
-        this.resolver = null; // Para resolver la promesa actual externamente
+        this.resolver = null;
     }
 
     async #parse(obj, data) {
@@ -40,10 +47,11 @@ export class GSAPAnimator {
         return result;
     }
 
-    async animate(state, data, options = { cancelable: true }) {
+    async animate(state, data, options = {}) {
         const animationDef = this.animations[state];
-        // La prioridad de "cancelable" es: parámetro de función > config de animación > config global
-        const isCancelable = options.cancelable ?? animationDef?.cancelable ?? this.config.cancelable;
+        
+        // Resolve cancelable flag: Call Param > Animation Def > Global Setting
+        const isCancelable = options.cancelable ?? animationDef?.cancelable ?? this.settings.cancelable;
 
         this.nextTask = { state, data, isCancelable };
 
@@ -59,9 +67,9 @@ export class GSAPAnimator {
     #cancelCurrent() {
         const el = document.querySelector(this.selector);
         if (el) {
-            gsap.killTweensOf(el); // Detiene la animación física
+            gsap.killTweensOf(el);
             if (this.resolver) {
-                this.resolver(); // Desbloquea el await del loop #run
+                this.resolver();
                 this.resolver = null;
             }
         }
@@ -74,7 +82,9 @@ export class GSAPAnimator {
             this.nextTask = null;
 
             const el = document.querySelector(this.selector);
-            const steps = this.animations[current.state]?.steps || this.animations[current.state];
+            const config = this.animations[current.state];
+            const steps = config?.steps || config;
+            
             if (!steps || !el) continue;
 
             const stepsArray = Array.isArray(steps) ? steps : [steps];
@@ -82,11 +92,14 @@ export class GSAPAnimator {
             for (const step of stepsArray) {
                 const props = await this.#parse(step.props, current.data);
                 
+                // Clean props: Remove internal logic keys to avoid GSAP warnings
+                const { cancelable, ...gsapProps } = props;
+
                 await new Promise((resolve) => {
                     this.resolver = resolve;
                     gsap[step.direction || 'to'](el, {
-                        ...this.config,
-                        ...props,
+                        ...this.defaults,
+                        ...gsapProps,
                         onComplete: () => {
                             this.resolver = null;
                             resolve();
