@@ -8,7 +8,7 @@ export class GSAPAnimator {
         
         // Internal settings for the animator logic
         this.settings = {
-            cancelable: config.cancelable ?? false
+            cancelable: config.cancelable ?? true
         };
 
         // Default properties for GSAP tweens
