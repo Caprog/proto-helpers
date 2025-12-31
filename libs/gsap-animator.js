@@ -78,6 +78,7 @@ export class GSAPAnimator {
     async #run() {
         this.busy = true;
         while (this.nextTask) {
+            console.debug('Running animation', this.nextTask);
             const current = this.nextTask;
             this.nextTask = null;
 
