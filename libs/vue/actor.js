@@ -8,11 +8,7 @@ export class Actor {
     constructor(initialState) {
         this.el = ref(null);
         this.behaviors = [];
-        
-        // El Actor instancia su propio cerebro internamente
         this.state$ = new StateSubject(initialState);
-        
-        // Estado reactivo para el template de Vue
         this.current = ref(initialState);
         
         this.subscription = this.state$.subscribe(v => {
@@ -22,26 +18,14 @@ export class Actor {
         onUnmounted(() => this.dispose());
     }
 
-    // Interfaz directa para modificar el estado
-    patch(data) {
-        this.state$.patch(data);
-        return this;
-    }
-
-    patchNested(key, data) {
-        this.state$.patchNested(key, data);
-        return this;
-    }
-
     use(behavior, ...args) {
-        this.behaviors.push({ fn: behavior, args });
+        // Registramos el comportamiento inmediatamente para que Vue detecte el hook
+        behavior(this.el, this.state$, ...args);
         return this;
     }
 
     spawn() {
-        this.behaviors.forEach(b => {
-            b.fn(this.el, this.state$, ...b.args);
-        });
+        // Solo devuelve la referencia para el template
         return this.el;
     }
 
