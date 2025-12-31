@@ -1,5 +1,3 @@
-import gsap from 'https://esm.sh/gsap';
-
 export function useHandLayout(actors, options = {}) {
     const {
         spacing = 60,
@@ -10,7 +8,7 @@ export function useHandLayout(actors, options = {}) {
 
     const updateLayout = () => {
         const n = actors.length;
-        if (n === 0) return;
+        if (n === 0 || !actors) return;
 
         actors.forEach((actor, i) => {
             // No movemos la carta si el usuario la está arrastrando
