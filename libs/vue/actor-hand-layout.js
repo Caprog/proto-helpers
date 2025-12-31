@@ -1,36 +1,32 @@
-const { watch, nextTick, onMounted } = Vue;
+const { watch, nextTick } = Vue;
 
 export function useHandLayout(actors, options = {}) {
-    const { spacing = 70, curve = 5, rotationStep = 8 } = options;
+    const { spacing = 80, curve = 5, rotation = 8 } = options;
 
-    const updateLayout = async () => {
-        // Esperamos al siguiente tick de Vue para asegurar que los refs de los actores existan
+    const update = async () => {
         await nextTick();
+        
+        const total = actors.length;
+        if (total === 0) return;
 
         actors.forEach((actor, i) => {
-            if (!actor?.current?.value || !actor.state$) return;
-
+            if (!actor?.state$ || !actor?.current?.value) return;
             if (actor.current.value.state === 'dragging') return;
 
-            const centerIndex = (actors.length - 1) / 2;
-            const distance = i - centerIndex;
+            const center = (total - 1) / 2;
+            const distance = i - center;
 
-            // Actualizamos el estado de forma segura
-            actor.state$.patch({
+            actor.patch({
                 layout: {
                     x: distance * spacing,
                     y: Math.pow(Math.abs(distance), 2) * curve,
-                    rotate: distance * rotationStep
+                    rotate: distance * rotation
                 }
             });
         });
     };
 
-    onMounted(() => {
-        updateLayout();
-    });
+    watch(() => actors.length, update, { immediate: true, deep: true });
 
-    watch(() => actors.length, updateLayout);
-    
-    return { updateLayout };
+    return { update };
 }
