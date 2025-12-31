@@ -2,7 +2,7 @@ import { GSAPAnimator } from '../gsap-animator.js';
 
 const { onMounted, onUnmounted } = Vue;
 
-export function useGSAPAnimator(targetRef, animations, state$) {
+export function useGSAPAnimator(targetRef, state$, animations) {
     let animator = null;
     let subscription = null;
 
