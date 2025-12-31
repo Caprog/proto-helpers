@@ -65,7 +65,7 @@ export class GSAPAnimator {
     }
 
     #cancelCurrent() {
-        const el = document.querySelector(this.selector);
+        const el = this.#getElement();
         if (el) {
             gsap.killTweensOf(el);
             if (this.resolver) {
@@ -75,6 +75,12 @@ export class GSAPAnimator {
         }
     }
 
+    #getElement() {
+        return typeof this.selector === 'string' 
+            ? document.querySelector(this.selector) 
+            : this.selector;
+    }
+
     async #run() {
         this.busy = true;
         while (this.nextTask) {
@@ -82,7 +88,7 @@ export class GSAPAnimator {
             const current = this.nextTask;
             this.nextTask = null;
 
-            const el = document.querySelector(this.selector);
+            const el = this.#getElement();
             const config = this.animations[current.state];
             const steps = config?.steps || config;
             
