@@ -81,42 +81,43 @@ export class GSAPAnimator {
             : this.selector;
     }
 
-    async #run() {
-        this.busy = true;
-        while (this.nextTask) {
+async #run() {
+    this.busy = true;
+    while (this.nextTask) {
             console.debug('Running animation', this.nextTask);
-            const current = this.nextTask;
-            this.nextTask = null;
+        const current = this.nextTask;
+        this.nextTask = null;
 
             const el = this.#getElement();
             const config = this.animations[current.state];
             const steps = config?.steps || config;
             
-            if (!steps || !el) continue;
+        if (!steps || !el) continue;
 
             const stepsArray = Array.isArray(steps) ? steps : [steps];
 
             for (const step of stepsArray) {
-                const props = await this.#parse(step.props, current.data);
-                const { cancelable, ...gsapProps } = props;
+            const props = await this.#parse(step.props, current.data);
+            const { cancelable, ...gsapProps } = props;
 
-                await new Promise((resolve) => {
-                    this.resolver = resolve;
-                    gsap[step.direction || 'to'](el, {
+            await new Promise((resolve) => {
+                this.resolver = resolve;
+                gsap[step.direction || 'to'](el, {
                         ...this.defaults,
-                        ...gsapProps,
+                    ...gsapProps,
                         // ESTO ES LO NUEVO: Dispara el callback al iniciar el movimiento
-                        onStart: () => {
-                            if (this.onStepStart) this.onStepStart(current.state);
-                        },
-                        onComplete: () => {
-                            this.resolver = null;
-                            resolve();
-                        }
-                    });
+                    onStart: () => {
+                        if (this.onStepStart) this.onStepStart(current.state);
+                    },
+                    onComplete: () => {
+                        this.resolver = null;
+                        if (this.onStepComplete) this.onStepComplete(current.state);
+                        resolve();
+                    }
                 });
-            }
+            });
         }
-        this.busy = false;
     }
+    this.busy = false;
+}
 }

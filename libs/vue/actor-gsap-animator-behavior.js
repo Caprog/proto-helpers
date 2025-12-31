@@ -9,9 +9,12 @@ export function useGSAPAnimator(targetRef, actor, animations) {
         if (!targetRef.value) return;
         animator = new GSAPAnimator(targetRef.value, animations);
 
-        // Conectamos el inicio real de la animación con las señales del Actor
         animator.onStepStart = (state) => {
             actor.emit(`anim_start:${state}`);
+        };
+
+        animator.onStepComplete = (state) => {
+            actor.emit(`anim_end:${state}`);
         };
 
         subscription = actor.state$.subscribe((val) => {
