@@ -1,16 +1,10 @@
 export function useHoverBehavior(targetRef, actor) {
     const handleEnter = () => {
-        if (actor.current.value.state !== 'dragging') {
-            actor.state$.patch({ state: 'hover' });
-            actor.emit('hover_enter'); // Señal
-        }
+        actor.emit('INPUT_HOVER_ENTER');
     };
 
     const handleLeave = () => {
-        if (actor.current.value.state !== 'dragging') {
-            actor.state$.patch({ state: 'idle' });
-            actor.emit('hover_leave'); // Señal
-        }
+        actor.emit('INPUT_HOVER_LEAVE');
     };
 
     Vue.onMounted(() => {
@@ -18,5 +12,12 @@ export function useHoverBehavior(targetRef, actor) {
         if (!el) return;
         el.addEventListener('mouseenter', handleEnter);
         el.addEventListener('mouseleave', handleLeave);
+    });
+
+    Vue.onUnmounted(() => {
+        const el = targetRef.value;
+        if (!el) return;
+        el.removeEventListener('mouseenter', handleEnter);
+        el.removeEventListener('mouseleave', handleLeave);
     });
 }
