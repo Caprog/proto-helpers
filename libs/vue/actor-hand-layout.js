@@ -1,4 +1,4 @@
-const { watch, nextTick } = Vue;
+const { watch, nextTick, onMounted } = Vue;
 
 export function useHandLayout(actors, options = {}) {
     const { spacing = 70, curve = 5, rotationStep = 8 } = options;
@@ -26,8 +26,11 @@ export function useHandLayout(actors, options = {}) {
         });
     };
 
-    // Solo observamos cambios profundos en la colección
-    watch(() => actors.length, updateLayout, { immediate: true });
+    onMounted(() => {
+        updateLayout();
+    });
+
+    watch(() => actors.length, updateLayout);
     
     return { updateLayout };
 }
