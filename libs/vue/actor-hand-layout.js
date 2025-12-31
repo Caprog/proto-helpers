@@ -11,6 +11,7 @@ export function useHandLayout(actors, options = {}) {
         if (n === 0 || !actors) return;
 
         actors.forEach((actor, i) => {
+            if (!actor.current.value) return;
             // No movemos la carta si el usuario la está arrastrando
             if (actor.current.value.state === 'dragging') return;
 
@@ -22,7 +23,7 @@ export function useHandLayout(actors, options = {}) {
             const tr = centerOffset * tiltAmount;
 
             // Actualizamos el estado del Actor para que su Animator reaccione
-            actor.patch({
+            actor.state$.patchNested({
                 layout: { x: tx, y: ty, rotate: tr }
             });
         });
