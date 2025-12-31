@@ -14,6 +14,8 @@ export class GSAPAnimator {
         this.helpers = {
             clamp: (val, min, max) => Math.min(Math.max(val, min), max)
         };
+        this.busy = false;
+        this.nextTask = null;
     }
 
     async #parse(obj, data) {
@@ -29,13 +31,8 @@ export class GSAPAnimator {
                 return obj;
             }
         }
-
         if (typeof obj !== 'object' || obj === null) return obj;
-        if (Array.isArray(obj)) {
-            const parsedArray = await Promise.all(obj.map(item => this.#parse(item, data)));
-            return parsedArray;
-        }
-
+        if (Array.isArray(obj)) return Promise.all(obj.map(item => this.#parse(item, data)));
         const result = {};
         for (const key in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -46,17 +43,24 @@ export class GSAPAnimator {
     }
 
     async animate(state, data) {
-        console.debug('Animating', this.selector, state, data);
-        const el = document.querySelector(this.selector);
-        const steps = this.animations[state];
-        if (!steps || !el) return;
+        this.nextTask = { state, data };
+        if (this.busy) return;
+        await this.#run();
+    }
 
-        for (const step of steps) {
-            const props = await this.#parse(step.props, data);
-            gsap[step.direction || 'to'](el, {
-                ...this.config,
-                ...props
-            });
+    async #run() {
+        this.busy = true;
+        while (this.nextTask) {
+            const { state, data } = this.nextTask;
+            this.nextTask = null;
+            const el = document.querySelector(this.selector);
+            const steps = this.animations[state];
+            if (!steps || !el) continue;
+            for (const step of steps) {
+                const props = await this.#parse(step.props, data);
+                await gsap[step.direction || 'to'](el, { ...this.config, ...props });
+            }
         }
+        this.busy = false;
     }
 }

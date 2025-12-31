@@ -1,0 +1,12 @@
+{
+  "name": "proto-helpers",
+  "version": "1.0.0",
+  "description": "Helper libraries for prototyping",
+  "main": "index.js",
+  "scripts": {
+    "purge": "node scripts/purge-cdn.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
