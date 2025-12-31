@@ -1,7 +1,7 @@
 import { StateSubject } from '../state-subject.js';
 import htm from 'https://unpkg.com/htm?module';
 
-const { h, ref, onMounted, onUnmounted } = Vue;
+const { h, ref, onUnmounted } = Vue;
 export const html = htm.bind(h);
 
 export class Actor {
@@ -22,10 +22,6 @@ export class Actor {
             }
             this.current.value = v;
         });
-
-        onMounted(() => {
-          this.behaviors.forEach(({ behavior, args }) => behavior(this.el, this, ...args));  
-        })
 
         onUnmounted(() => this.dispose());
     }
@@ -54,7 +50,7 @@ export class Actor {
      */
     use(behavior, ...args) {
         if (this.debug) console.log(`%c[Actor] Equipping Behavior: ${behavior.name}`, "color: #facc15;");
-        this.behaviors.push({ behavior, args });
+        behavior(this.el, this, ...args);
         return this;
     }
 
